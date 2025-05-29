@@ -3,7 +3,7 @@
 client_id = "711f95cf5c59811344721d9bb89b2255"
 name = "bundled-app"
 handle = "bundled-app-1"
-application_url = "https://lot-meaning-constitute-ed.trycloudflare.com"
+application_url = "https://presidential-mls-apparel-pitch.trycloudflare.com"
 embedded = true
 
 [build]
@@ -27,9 +27,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://lot-meaning-constitute-ed.trycloudflare.com/auth/callback",
-  "https://lot-meaning-constitute-ed.trycloudflare.com/auth/shopify/callback",
-  "https://lot-meaning-constitute-ed.trycloudflare.com/api/auth/callback"
+  "https://presidential-mls-apparel-pitch.trycloudflare.com/auth/callback",
+  "https://presidential-mls-apparel-pitch.trycloudflare.com/auth/shopify/callback",
+  "https://presidential-mls-apparel-pitch.trycloudflare.com/api/auth/callback"
 ]
 
 [pos]
