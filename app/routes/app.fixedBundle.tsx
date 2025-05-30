@@ -10,23 +10,44 @@ import {
     BlockStack,
     Button,
     EmptyState,
-    Grid
+    Grid,
+    Tag
   } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Product } from "@shopify/app-bridge-types";
 
 export default function FixedBundlePage() {
+    interface SelectedProductIds {
+        id: string;
+        variants: {id: string}[];
+    }
+
     const [products, setProducts] = useState<Product[]>([]);
+    const [productIds, setProductIds] = useState<SelectedProductIds[]>([]);
     
     // https://shopify.dev/docs/api/app-bridge-library/apis/resource-picker
     async function selectProduct() {
         const selectedProducts = await shopify.resourcePicker({
             type: "product",
-            multiple: true
+            multiple: true,
+            selectionIds: productIds,
         }) as Product[] | undefined;
 
         if (selectedProducts) {
-            setProducts(products.concat(selectedProducts));
+            setProducts(selectedProducts);
+
+            const ids : SelectedProductIds[] = [];
+            selectedProducts.forEach(product => {
+                let productObj : SelectedProductIds = {'id': product.id, 'variants': []};
+                if (product.variants) {
+                    product.variants.forEach(variant => {
+                        productObj.variants.push({'id': variant.id!});
+                    });
+                }
+                ids.push(productObj);
+            });
+
+            setProductIds(ids);
         }
     }
 
