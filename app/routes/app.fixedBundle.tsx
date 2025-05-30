@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import {
     Box,
     Card,
@@ -11,7 +11,8 @@ import {
     Button,
     EmptyState,
     Grid,
-    Tag
+    Tag,
+    TextField
   } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Product } from "@shopify/app-bridge-types";
@@ -24,6 +25,7 @@ export default function FixedBundlePage() {
 
     const [products, setProducts] = useState<Product[]>([]);
     const [productIds, setProductIds] = useState<SelectedProductIds[]>([]);
+    const [bundleName, setBundleName] = useState<string>("");
     
     // https://shopify.dev/docs/api/app-bridge-library/apis/resource-picker
     async function selectProduct() {
@@ -51,6 +53,10 @@ export default function FixedBundlePage() {
         }
     }
 
+    const handleBundleNameChange = useCallback((value: string) => {
+        setBundleName(value);
+    }, []);
+
     return (
         <Page>
             <TitleBar title="Fixed Bundle" />
@@ -59,8 +65,13 @@ export default function FixedBundlePage() {
                 <Layout.Section>
                     <Card>
 
+                        <div style={{display: 'flex', flexDirection: 'row', justifyContent: 'start', alignItems: 'center', gap: '15px', marginBottom: '20px'}}>
+                            <Text as="h3" variant="headingMd">Bundle Name</Text>
+                            <TextField label="Bundle Name" value={bundleName} onChange={handleBundleNameChange} autoComplete="off" labelHidden />
+                        </div>
+
                         <Button onClick={selectProduct} id="select-product">
-                            Select product
+                            Select products
                         </Button>
 
                         {products.length > 0 ? (
