@@ -9,6 +9,7 @@ import {
     Text,
     BlockStack,
     Button,
+    EmptyState
   } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Product } from "@shopify/app-bridge-types";
@@ -35,6 +36,18 @@ export default function FixedBundlePage() {
             <Button onClick={selectProduct} id="select-product">
                 Select product
             </Button>
+
+            {products.length > 0 ? (
+                products.map(product => (
+                    <Card key={product.id}>
+                        <Text as="h3" variant="headingMd">{product.title}</Text>
+                    </Card>
+                ))
+            ) : (
+                <EmptyState image="" heading="No products selected">
+                    <Text as="p" variant="bodyMd">Select products to add them to the bundle</Text>
+                </EmptyState>
+            )}
 
         </Page>
     );
