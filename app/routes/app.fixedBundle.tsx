@@ -57,6 +57,10 @@ export default function FixedBundlePage() {
         setBundleName(value);
     }, []);
 
+    async function createBundle() {
+
+    }
+
     return (
         <Page>
             <TitleBar title="Fixed Bundle" />
@@ -103,6 +107,15 @@ export default function FixedBundlePage() {
 
                     </Card>
 
+                </Layout.Section>
+
+                <Layout.Section variant="oneThird">
+                    <Card>
+                        <Text as="h3" variant="headingMd">Bundle Validation</Text>
+                        <BlockStack gap="200">
+                            <Button variant="primary" onClick={createBundle}>Create Bundle</Button>
+                        </BlockStack>
+                    </Card>
                 </Layout.Section>
             </Layout>
 
