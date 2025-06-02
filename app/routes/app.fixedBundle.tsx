@@ -16,6 +16,76 @@ import {
   } from "@shopify/polaris";
 import { TitleBar } from "@shopify/app-bridge-react";
 import { Product } from "@shopify/app-bridge-types";
+import { useActionData, useFetcher } from "@remix-run/react";
+import { authenticate } from "../shopify.server";
+import { json, ActionFunctionArgs } from "@remix-run/node";
+
+function extractOptionSelections(product: Product): {componentOptionId: string, name: string, values: string[]}[] {
+    const selections: {componentOptionId: string, name: string, values: string[]}[] = [];
+        product.options.forEach((option) => {
+            selections.push({
+                componentOptionId: option.id,
+                name: option.name,
+                values: option.values
+            });
+        });
+    return selections;
+}
+
+export async function action({ request }: ActionFunctionArgs) {
+    const formData = await request.formData();
+    const bundleName = formData.get("bundleName");
+    const productsJson = formData.get("products");
+    const products = productsJson ? JSON.parse(productsJson as string) : [];
+    const { admin } = await authenticate.admin(request);
+
+    if (!bundleName || !Array.isArray(products) || products.length < 2) {
+        return json({ error: "Invalid bundle data." }, { status: 400 });
+    }
+
+    const data = {
+        title: bundleName,
+        components: products.map(product => ({
+            quantity: 1,
+            productId: product.id,
+            optionSelections: extractOptionSelections(product)
+        }))
+    };
+
+    const createBundleGraphQL = `
+        mutation productBundleCreate($input: ProductBundleCreateInput!) {
+            productBundleCreate(input: $input) {
+                productBundleOperation {
+                    id
+                    product {
+                        handle
+                    }
+                    status
+                }
+                userErrors {
+                    field
+                    message
+                }
+            }
+        }
+    `;
+
+    try {
+        const response = await admin.graphql(createBundleGraphQL, { variables: { input: data } });
+        const responseJson = await response.json();
+
+        if (responseJson.data?.productBundleCreate?.userErrors?.length) {
+            return json({ error: responseJson.data.productBundleCreate.userErrors }, { status: 400 });
+        }
+
+        return json({
+            success: true,
+            bundle: responseJson.data.productBundleCreate.productBundleOperation
+        });
+    } catch (err) {
+        return json({ error: err.message || "Unknown error" }, { status: 500 });
+    }
+}
 
 export default function FixedBundlePage() {
     interface SelectedProductIds {
@@ -28,6 +98,8 @@ export default function FixedBundlePage() {
     const [bundleName, setBundleName] = useState<string>("");
     const [variantsCount, setVariantsCount] = useState<number>(0);
     const [enableCreateButton, setEnableCreateButton] = useState<boolean>(false);
+    const errors = useActionData()?.errors || {};
+    const fetcher = useFetcher();
     
     // https://shopify.dev/docs/api/app-bridge-library/apis/resource-picker
     async function selectProduct() {
@@ -74,10 +146,6 @@ export default function FixedBundlePage() {
         setBundleName(value);
     }, []);
 
-    async function createBundle() {
-
-    }
-
     // validation:
     // bundle can have up to 30 components
     // no nested bundles
@@ -85,7 +153,6 @@ export default function FixedBundlePage() {
     // max number of variants 2000
     function validateBundle() {
         console.log(products);
-        console.log(bundleName);
         if (products.length > 30 || products.length < 2 || bundleName === '' || variantsCount > 2000 || variantsCount < 1) {
             setEnableCreateButton(false);
             return;
@@ -152,8 +219,32 @@ export default function FixedBundlePage() {
                     <Card>
                         <Text as="h3" variant="headingMd">Bundle Validation</Text>
                         <BlockStack gap="200">
-                            <Button variant="primary" disabled={!enableCreateButton} onClick={createBundle}>Create Bundle</Button>
+                        <fetcher.Form method="post">
+                          <input type="hidden" name="bundleName" value={bundleName} />
+                          <input type="hidden" name="products" value={JSON.stringify(products)} />
+                          <button
+                            type="submit"
+                            disabled={!enableCreateButton}
+                            style={{
+                              background: '#008060',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: 4,
+                              padding: '8px 16px',
+                              fontSize: '16px',
+                              cursor: enableCreateButton ? 'pointer' : 'not-allowed'
+                            }}
+                          >
+                            Create Bundle
+                          </button>
+                        </fetcher.Form>
                         </BlockStack>
+                        {fetcher.data?.success && (
+                          <Text as="h3" variant="headingMd">Bundle created successfully!</Text>
+                        )}
+                        {fetcher.data?.error && (
+                          <Text as="h3" variant="headingMd">Error: {JSON.stringify(fetcher.data.error)}</Text>
+                        )}
                     </Card>
                 </Layout.Section>
             </Layout>
