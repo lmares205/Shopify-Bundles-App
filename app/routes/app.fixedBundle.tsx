@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import {
     Box,
     Card,
@@ -27,6 +27,7 @@ export default function FixedBundlePage() {
     const [productIds, setProductIds] = useState<SelectedProductIds[]>([]);
     const [bundleName, setBundleName] = useState<string>("");
     const [variantsCount, setVariantsCount] = useState<number>(0);
+    const [enableCreateButton, setEnableCreateButton] = useState<boolean>(false);
     
     // https://shopify.dev/docs/api/app-bridge-library/apis/resource-picker
     async function selectProduct() {
@@ -42,7 +43,7 @@ export default function FixedBundlePage() {
             const ids : SelectedProductIds[] = [];
             selectedProducts.forEach(product => {
                 let productObj : SelectedProductIds = {'id': product.id, 'variants': []};
-                if (product.variants) {
+                if (product.variants && !product.hasOnlyDefaultVariant) {
                     product.variants.forEach(variant => {
                         productObj.variants.push({'id': variant.id!});
                     });
@@ -77,6 +78,26 @@ export default function FixedBundlePage() {
 
     }
 
+    // validation:
+    // bundle can have up to 30 components
+    // no nested bundles
+    // has a bundle title
+    // max number of variants 2000
+    function validateBundle() {
+        console.log(products);
+        console.log(bundleName);
+        if (products.length > 30 || products.length < 2 || bundleName === '' || variantsCount > 2000 || variantsCount < 1) {
+            setEnableCreateButton(false);
+            return;
+        }
+
+        setEnableCreateButton(true);
+    }
+
+    useEffect(() => {
+        validateBundle();
+    }, [products, bundleName, variantsCount]);
+
     return (
         <Page>
             <TitleBar title="Fixed Bundle" />
@@ -107,7 +128,7 @@ export default function FixedBundlePage() {
                                     </div>
 
                                     <div className="selected-variants" style={{display: 'flex', gap: '10px'}}>
-                                        {product.variants && product.variants.length > 1 ? (
+                                        {product.variants && !product.hasOnlyDefaultVariant ? (
                                             product.variants.map(variant => (
                                                 <Tag key={variant.id}>{variant.title}</Tag>
                                             ))
@@ -129,7 +150,7 @@ export default function FixedBundlePage() {
                     <Card>
                         <Text as="h3" variant="headingMd">Bundle Validation</Text>
                         <BlockStack gap="200">
-                            <Button variant="primary" onClick={createBundle}>Create Bundle</Button>
+                            <Button variant="primary" disabled={!enableCreateButton} onClick={createBundle}>Create Bundle</Button>
                         </BlockStack>
                     </Card>
                 </Layout.Section>
