@@ -26,6 +26,7 @@ export default function FixedBundlePage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [productIds, setProductIds] = useState<SelectedProductIds[]>([]);
     const [bundleName, setBundleName] = useState<string>("");
+    const [variantsCount, setVariantsCount] = useState<number>(0);
     
     // https://shopify.dev/docs/api/app-bridge-library/apis/resource-picker
     async function selectProduct() {
@@ -48,6 +49,21 @@ export default function FixedBundlePage() {
                 }
                 ids.push(productObj);
             });
+
+            if (selectedProducts.length > 0) {
+                let computedVariants = 1;
+                selectedProducts.forEach(product => {
+                    if (product.variants && !product.hasOnlyDefaultVariant) {
+                        let options = product.options;
+                        options.forEach(option => {
+                            computedVariants *= option.values.length;
+                        });
+                    }
+                });
+                setVariantsCount(computedVariants);
+            } else {
+                setVariantsCount(0);
+            }
 
             setProductIds(ids);
         }
