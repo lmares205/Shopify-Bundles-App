@@ -116,26 +116,28 @@ export default function FixedBundlePage() {
                         </Button>
 
                         {products.length > 0 ? (
-                            products.map(product => (
-                                <Box borderColor="border" borderWidth="025" borderRadius="200" padding="500" key={product.id}>
-                                    <div style={{display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '20px', marginBottom: '20px'}}>
-                                        {product.images && product.images.length > 0 ? (
-                                            <img src={product.images[0].originalSrc} alt={product.title} width={150} style={{objectFit: 'contain', borderRadius: '10px'}} />
-                                        ) : (
-                                            <img src="" alt={product.title} width={150} style={{objectFit: 'contain', borderRadius: '10px'}} />
-                                        )}
-                                        <Text as="h3" variant="headingMd">{product.title}</Text>
-                                    </div>
+                            <div className="products" style={{display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '20px'}}>
+                                {products.map(product => (
+                                    <Box borderColor="border" borderWidth="025" borderRadius="200" padding="500" key={product.id}>
+                                        <div style={{display: 'flex', alignItems: 'center', justifyContent: 'start', gap: '20px', marginBottom: '20px'}}>
+                                            {product.images && product.images.length > 0 ? (
+                                                <img src={product.images[0].originalSrc} alt={product.title} width={150} style={{objectFit: 'contain', borderRadius: '10px'}} />
+                                            ) : (
+                                                <img src="" alt={product.title} width={150} style={{objectFit: 'contain', borderRadius: '10px'}} />
+                                            )}
+                                            <Text as="h3" variant="headingMd">{product.title}</Text>
+                                        </div>
 
-                                    <div className="selected-variants" style={{display: 'flex', gap: '10px'}}>
-                                        {product.variants && !product.hasOnlyDefaultVariant ? (
-                                            product.variants.map(variant => (
-                                                <Tag key={variant.id}>{variant.title}</Tag>
-                                            ))
-                                        ) : null}
-                                    </div>
-                                </Box>
-                            ))
+                                        <div className="selected-variants" style={{display: 'flex', gap: '10px'}}>
+                                            {product.variants && !product.hasOnlyDefaultVariant ? (
+                                                product.variants.map(variant => (
+                                                    <Tag key={variant.id}>{variant.title}</Tag>
+                                                ))
+                                            ) : null}
+                                        </div>
+                                    </Box>
+                                ))}
+                            </div>
                         ) : (
                             <EmptyState image="" heading="No products selected">
                                 <Text as="p" variant="bodyMd">Select products to add them to the bundle</Text>
