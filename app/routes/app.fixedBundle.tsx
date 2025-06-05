@@ -222,21 +222,12 @@ export default function FixedBundlePage() {
                         <fetcher.Form method="post">
                           <input type="hidden" name="bundleName" value={bundleName} />
                           <input type="hidden" name="products" value={JSON.stringify(products)} />
-                          <button
-                            type="submit"
+                          <Button
+                            submit
                             disabled={!enableCreateButton}
-                            style={{
-                              background: '#008060',
-                              color: 'white',
-                              border: 'none',
-                              borderRadius: 4,
-                              padding: '8px 16px',
-                              fontSize: '16px',
-                              cursor: enableCreateButton ? 'pointer' : 'not-allowed'
-                            }}
                           >
                             Create Bundle
-                          </button>
+                          </Button>
                         </fetcher.Form>
                         </BlockStack>
                         {fetcher.data?.success && (
